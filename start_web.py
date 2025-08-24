@@ -11,14 +11,19 @@ import json
 
 def check_dependencies():
     """检查依赖包"""
-    required_packages = ['flask', 'flask-cors']
+    # 包名映射：requirements.txt中的名称 -> Python中实际导入的名称
+    package_mapping = {
+        'flask': 'flask',
+        'flask-cors': 'flask_cors'
+    }
+    
     missing_packages = []
     
-    for package in required_packages:
+    for req_name, import_name in package_mapping.items():
         try:
-            __import__(package.replace('-', '_'))
+            __import__(import_name)
         except ImportError:
-            missing_packages.append(package)
+            missing_packages.append(req_name)
     
     if missing_packages:
         print("❌ 缺少以下依赖包:")
@@ -188,4 +193,4 @@ def main():
         sys.exit(1)
 
 if __name__ == '__main__':
-    main() 
+    main()

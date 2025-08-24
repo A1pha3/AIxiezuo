@@ -3,13 +3,16 @@
 ## 项目概述
 基于LangChain的智能小说生成系统，采用高度模块化和插件式架构设计。系统通过全局配置管理器和统一调用接口实现完全的参数化控制，无硬编码提示词或占位符。
 
+[详细技术文档](./doc/code_analyze.md)
+
 ## 核心架构特性
 - 🔧 **全局配置管理** - 统一的大模型配置获取
-- 🚀 **全局LLM调用器** - 插件式大模型调用接口
+- 🚀 **全局LLM调用器** - 插件式大模型调用接口  
 - ⚙️ **接口参数化** - 所有功能通过参数控制
 - 🧩 **高度模块化** - 组件间完全解耦
 - 💾 **智能状态管理** - 自动状态追踪和更新
-
+- 🧠 **分片记忆系统** - 支持大容量对话记录和智能压缩
+- 🔍 **小说ID隔离** - 多项目并行创作支持
 - 🚫 **零硬编码** - 文档中所有代码示例的字符串都是参数示例，非硬编码
 
 ## 架构设计
@@ -33,6 +36,8 @@ response = LLMCaller.call(
 ### 3. 业务组件
 - **NovelGenerator** - 小说生成 (集成智能状态管理)
 - **StateManager** - 状态管理
+- **MemoryManager** - 分片记忆管理器 (支持压缩和索引)
+- **Web服务器** - Flask API接口 (web_server.py)
 
 ## 支持的大模型
 
@@ -64,23 +69,30 @@ response = LLMCaller.call(
     "temperature": 0.7
 }
 
-# DSF5模型配置
+# DSF5模型配置（从环境变量读取）
 "dsf5": {
     "provider": "openai",
-    "model": "[稳定]gemini-2.5-pro-preview-06-05-c",
+    "model": os.getenv("DSF5_API_MODEL"),  # 用户自定义模型名
     "api_key": os.getenv("DSF5_API_KEY"),
-    "base_url": "https://api.sikong.shop/v1", 
+    "base_url": os.getenv("DSF5_API_URL"),  # 用户自定义API地址
     "temperature": 0.7
 }
 ```
 
 ### 环境变量
 ```env
+# 必需的API密钥
 DEEPSEEK_API_KEY=your_deepseek_key
-DSF5_API_KEY=your_dsf5_key
+
+# 可选的API密钥
 OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key
 GOOGLE_API_KEY=your_google_key
+
+# 自定义DSF5配置
+DSF5_API_KEY=your_dsf5_key
+DSF5_API_URL=your_custom_api_url  # 如: https://api.example.com/v1
+DSF5_API_MODEL=your_model_name    # 如: gemini-2.5-pro-preview
 ```
 
 ## 使用方法
@@ -98,28 +110,31 @@ writing_rules = read_template("001_writing_rules.txt")
 system_prompt = writer_role + "\n\n" + writing_rules
 
 # 定义章节计划 (包含章节纲要和剧情设定)
-chapter_plan = {
-    "chapter_index": 1,
-    "title": "开始",
-    "main_plot": "主角开始修炼之路",
-    "chapter_outline": [
-        "发现修炼天赋",
-        "获得第一本功法", 
-        "遇到神秘危险"
-    ],
-    "target_word_count": 2500,
-    "mood": "紧张刺激"
+chapter_outline = """
+{
+  "chapter_index": 1,
+  "title": "开始",
+  "main_plot": "主角开始修炼之路",
+  "chapter_outline": [
+    "发现修炼天赋",
+    "获得第一本功法", 
+    "遇到神秘危险"
+  ],
+  "target_word_count": 2500,
+  "mood": "紧张刺激"
 }
+"""
 
-# 生成章节
+# 生成章节（注意：参数名为chapter_outline）
 content = generator.generate_chapter(
-    chapter_plan=chapter_plan,
+    chapter_outline=chapter_outline,      # 章节细纲（可以是JSON字符串或纯文本）
     model_name="deepseek_chat",
-    system_prompt=system_prompt,      # 传入拼接好的模版提示词
+    system_prompt=system_prompt,          # 传入拼接好的模版提示词
     use_state=True,
     use_world_bible=True,
-    use_previous_chapters=True,       # 启用前面章节内容读取
-    previous_chapters_count=2         # 读取前面2章的内容
+    use_previous_chapters=True,           # 启用前面章节内容读取
+    previous_chapters_count=2,            # 读取前面2章的内容
+    novel_id="my_novel_001"               # 小说ID，用于数据隔离
 )
 ```
 

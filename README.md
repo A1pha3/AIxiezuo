@@ -2,11 +2,12 @@
 
 基于LangChain的AI小说生成工具，支持多种大语言模型，具备状态管理和Web界面。
 
+[详细技术文档](./doc/code_analyze.md) | [uv 环境配置指南](./doc/uv_setup_guide.md)
+
 ## 功能特性
 
 - 🤖 支持多种大语言模型（DeepSeek、OpenAI、Claude、Gemini等）
 - 📚 章节状态管理和世界设定保存
-
 - 🌐 Web界面，便于交互式创作
 - 📝 多小说项目隔离管理
 - 🔄 多版本生成和比较
@@ -19,6 +20,17 @@
 
 ```bash
 pip install -r requirements.txt
+```
+
+**或者使用 uv 工具（推荐）：**
+
+```bash
+# 安装 uv (如果尚未安装)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 创建项目环境并安装依赖
+uv init
+uv pip install -r requirements.txt
 ```
 
 ### 2. 配置API密钥
@@ -179,4 +191,4 @@ new_state = generator.update_state(
 
 ## 许可证
 
-MIT License 
+MIT License
