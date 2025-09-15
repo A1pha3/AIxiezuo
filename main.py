@@ -89,6 +89,13 @@ class LLMConfigManager:
                 "api_key": os.getenv("GOOGLE_API_KEY"),
                 "base_url": None,
                 "temperature": 0.7
+            },
+            "glm": {
+                "provider": "openai",
+                "model": "glm-4-flash",
+                "api_key": os.getenv("GLM_API_KEY"),
+                "base_url": os.getenv("GLM_API_URL"),
+                "temperature": 0.7
             }
         }
         # 默认返回deepseek_chat模型
