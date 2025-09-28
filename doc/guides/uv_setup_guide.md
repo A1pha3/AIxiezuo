@@ -2,12 +2,38 @@
 
 本文档将详细介绍如何使用 uv 工具为 **AI小说生成系统** 项目创建 Python 环境并运行项目。uv 是一个由 Astral 团队开发的高性能 Python 包和项目管理器，它能够替代 pip、pip-tools、virtualenv 等工具，提供更快的依赖解析和安装速度。
 
-## 项目要求
+## 📋 项目要求
 
 - **Python版本**: >=3.12 (根据项目 pyproject.toml 配置)
 - **推荐工具**: uv (比传统 pip 快 10-100 倍)
 - **项目类型**: AI小说生成系统，基于 LangChain 和 Flask
-- **主要依赖**: flask, langchain 系列包, pydantic 等
+- **主要依赖**: 
+  - Web框架: `flask`, `flask-cors`
+  - AI/ML: `langchain`, `langchain-openai`, `langchain-community`
+  - 数据处理: `pydantic`, `requests`, `beautifulsoup4`
+  - 其他: `python-dotenv`, `colorama`
+
+## 🚀 快速开始
+
+如果您急于开始，可以按照以下步骤快速设置：
+
+```bash
+# 1. 安装 uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 2. 克隆项目并进入目录
+cd /path/to/AIxiezuo
+
+# 3. 初始化项目环境
+uv sync
+
+# 4. 运行项目
+uv run python start_web.py
+```
+
+访问 http://localhost:5001 即可使用系统。
+
+---
 
 ## 1. 安装 uv
 
@@ -39,89 +65,139 @@ uv --version
 
 ## 2. 创建项目环境
 
-uv 会自动管理虚拟环境，无需手动创建。在项目根目录下执行以下命令即可初始化项目环境：
+### 2.1 对于现有项目（推荐）
+
+由于 AI小说生成系统 已经配置了 `pyproject.toml` 文件，您只需要同步依赖即可：
+
+```bash
+# 在项目根目录执行
+uv sync
+```
+
+### 2.2 从零开始（仅供参考）
+
+如果您要创建新项目，可以使用：
 
 ```bash
 uv init
 ```
 
-执行原理：uv init 命令会创建一个 pyproject.toml 文件（如果不存在），并初始化项目的基本配置。它还会自动创建一个虚拟环境（通常在 .venv 目录下）。
+**执行原理**：
+- `uv sync` 会读取现有的 `pyproject.toml` 文件，创建虚拟环境并安装所有依赖
+- `uv init` 会创建新的 `pyproject.toml` 文件并初始化项目结构
 
-参数说明：
-- 无特殊参数，uv 会根据当前目录自动推断项目名称
+**流程分解**：
+1. 检查 `pyproject.toml` 和 `uv.lock` 文件
+2. 创建虚拟环境（位于 `.venv` 目录）
+3. 解析并安装所有依赖包
+4. 生成或更新 `uv.lock` 锁文件
 
-流程分解：
-1. 检查当前目录是否已有 pyproject.toml 文件
-2. 如果没有，则创建一个新的 pyproject.toml 文件
-3. 自动创建虚拟环境
+**最佳实践**：
+- ✅ 使用 `uv sync` 同步现有项目
+- ✅ 确保在项目根目录执行命令
+- ✅ 让 uv 自动管理虚拟环境，无需手动激活/停用
 
-最佳实践：
-- 在项目根目录执行 uv init，确保所有依赖都在同一环境中管理
-- uv 会自动选择合适的 Python 版本，如需指定特定版本可使用 uv python pin 命令
+## 3. 依赖管理
 
-## 3. 安装项目依赖
+### 3.1 安装项目依赖（推荐方式）
 
-项目依赖可以通过多种方式安装，推荐使用 uv add 和 uv sync 命令来管理依赖：
+对于 AI小说生成系统，所有依赖已在 `pyproject.toml` 中定义，直接同步即可：
 
 ```bash
-# 添加单个依赖
-uv add flask
-
-# 添加多个依赖
-uv add flask flask-cors
-
-# 同步所有依赖到当前环境
+# 安装所有项目依赖
 uv sync
 ```
 
-执行原理：
-- `uv add` 命令会将指定的依赖添加到 `pyproject.toml` 文件中，并更新 `uv.lock` 锁文件，然后在当前项目的虚拟环境中安装这些包。
-- `uv sync` 命令会根据 `pyproject.toml` 和 `uv.lock` 文件同步依赖到当前环境中。
+### 3.2 添加新依赖（开发时使用）
 
-参数说明：
-- `uv add <package_name>`：添加指定的依赖包
-- `uv sync`：同步所有依赖到当前环境
+```bash
+# 添加生产依赖
+uv add requests beautifulsoup4
 
-流程分解：
-1. 使用 uv add 添加依赖时，uv 会更新 pyproject.toml 和 uv.lock 文件
-2. 解析依赖关系，确定需要安装的包及其版本
-3. 从 PyPI 或配置的镜像源下载包
-4. 在虚拟环境中安装包
+# 添加开发依赖
+uv add --dev pytest black
 
-最佳实践：
-- 使用 uv add 添加依赖，使用 uv sync 同步依赖，而不是使用 uv pip install
-- uv 会自动生成和维护 uv.lock 文件，用于锁定依赖版本，确保在不同环境中的一致性
-- 可以通过 uv add --upgrade-package <package_name> 来升级特定依赖，或使用 uv sync --upgrade 来升级所有依赖
+# 添加可选依赖组
+uv add --optional-group dev pytest
+```
 
-关于 requirements.txt 文件：
-虽然项目中仍然保留了 `requirements.txt` 文件以确保与旧工具链的兼容性，但主要的依赖管理应该通过 `pyproject.toml` 文件和 uv 命令进行。`requirements.txt` 文件主要用于以下场景：
-1. 与其他不支持 pyproject.toml 的工具集成
-2. 在某些部署环境中作为备用依赖列表
-3. 为习惯使用 pip 的开发者提供参考
+### 3.3 依赖管理命令对比
 
-建议新项目直接使用 uv 工具链，避免手动维护 requirements.txt 文件。
+| 场景 | 推荐命令 | 说明 |
+|------|----------|------|
+| 首次设置项目 | `uv sync` | 根据锁文件安装确切版本 |
+| 添加新依赖 | `uv add <package>` | 自动更新 pyproject.toml |
+| 移除依赖 | `uv remove <package>` | 从配置文件中移除 |
+| 更新依赖 | `uv sync --upgrade` | 更新到最新兼容版本 |
+| 查看依赖 | `uv pip list` | 列出当前环境的包 |
+
+**执行原理**：
+- `uv add` 会更新 `pyproject.toml` 和 `uv.lock` 文件，确保依赖版本锁定
+- `uv sync` 根据锁文件安装确切版本，保证环境一致性
+- 所有操作都在项目的虚拟环境中进行，不影响系统 Python
+
+**关于 requirements.txt**：
+项目保留 `requirements.txt` 主要用于：
+- 与传统部署工具的兼容性
+- CI/CD 环境的备用方案
+- 团队成员的参考
+
+**⚠️ 重要提醒**：优先使用 `uv sync` 而不是 `pip install -r requirements.txt`
 
 ## 4. 运行项目
 
-安装完依赖后，可以使用 uv run 命令来运行项目：
+### 4.1 启动 Web 服务
 
 ```bash
+# 启动 AI小说生成系统 Web 服务
 uv run python start_web.py
 ```
 
-执行原理：uv run 命令会在当前项目的虚拟环境中执行指定的命令。它会自动激活虚拟环境，确保使用正确的 Python 解释器和已安装的依赖包。
+服务启动后，访问 http://localhost:5001 即可使用系统。
 
-参数说明：
-- `python start_web.py`：在虚拟环境中运行 start_web.py 脚本
+### 4.2 其他运行方式
 
-流程分解：
-1. 激活项目虚拟环境
-2. 使用虚拟环境中的 Python 解释器执行 start_web.py 脚本
-3. 脚本会启动 Flask Web 服务器，默认监听 0.0.0.0:5001
+```bash
+# 运行测试
+uv run pytest
 
-最佳实践：
-- 使用 uv run 而不是直接运行 python 命令，确保在正确的环境中执行
-- 可以通过 uv run -- python -m flask run 等方式运行其他命令
+# 运行 Python 脚本
+uv run python scripts/some_script.py
+
+# 进入交互式 Python 环境
+uv run python
+
+# 运行模块
+uv run python -m flask --app start_web run --debug
+```
+
+### 4.3 项目结构说明
+
+```
+AIxiezuo/
+├── start_web.py          # Web 服务入口文件
+├── pyproject.toml        # 项目配置和依赖定义
+├── uv.lock              # 依赖版本锁文件
+├── .venv/               # uv 创建的虚拟环境
+├── web/                 # Web 相关代码
+├── xiaoshuo/            # 小说生成核心逻辑
+└── templates/           # 模板文件
+```
+
+**执行原理**：
+- `uv run` 自动激活虚拟环境并执行命令
+- 无需手动 `source .venv/bin/activate`
+- 确保使用正确的 Python 解释器和依赖版本
+
+**服务配置**：
+- 默认端口：5001
+- 默认地址：0.0.0.0（允许外部访问）
+- 支持热重载（开发模式）
+
+**最佳实践**：
+- ✅ 始终使用 `uv run` 前缀
+- ✅ 在项目根目录执行命令
+- ✅ 使用 `Ctrl+C` 优雅停止服务
 
 ## 5. 关键配置原理解释
 
@@ -143,91 +219,203 @@ uv 会自动生成 uv.lock 文件，类似于其他语言的包管理器（如 C
 
 技术背景：锁文件机制是现代包管理器的重要特性，它解决了 "在我机器上能运行" 的问题，确保团队成员和部署环境使用完全相同的依赖版本。
 
-## 6. 故障排除
+## 6. 🔧 故障排除
 
-### 6.1 依赖安装失败
+### 6.1 常见问题快速解决
 
-如果遇到依赖安装失败，可以尝试以下方法：
+| 问题 | 解决方案 | 命令 |
+|------|----------|------|
+| 依赖安装失败 | 清理缓存重试 | `uv cache clean && uv sync` |
+| 找不到模块 | 确认使用 uv run | `uv run python start_web.py` |
+| Python 版本不对 | 固定 Python 版本 | `uv python pin 3.12` |
+| 虚拟环境混乱 | 删除重建 | `rm -rf .venv && uv sync` |
+| 端口被占用 | 更改端口或杀死进程 | `lsof -ti:5001 \| xargs kill -9` |
 
-1. 清理缓存：
-   ```bash
-   uv cache clean
-   ```
+### 6.2 依赖相关问题
 
-2. 重新安装依赖：
-   ```bash
-   uv sync --force-reinstall
-   ```
-
-### 6.2 依赖检查问题
-
-如果使用 `uv sync` 安装依赖后，运行 `uv run python start_web.py` 仍然提示缺少依赖包（如 flask、flask-cors），这可能是由于项目中的依赖检查逻辑没有正确识别这些包的导入名称。
-
-对于 flask-cors 包，其在 Python 中的实际导入名称是 `flask_cors`，而不是 `flask-cors`。项目已更新依赖检查逻辑以正确处理这种情况。
-
-如果仍然遇到问题，请确保：
-1. 在项目根目录执行命令
-2. 使用 `uv run` 前缀运行脚本
-3. 项目代码已更新到最新版本
-
-### 6.3 Python 版本问题
-
-如果需要指定特定的 Python 版本，可以使用：
-
+**问题：ModuleNotFoundError**
 ```bash
-uv python install 3.11
-uv python pin 3.11
+# 检查依赖是否正确安装
+uv pip list | grep flask
+
+# 重新安装依赖
+uv sync --force-reinstall
+
+# 确认在正确环境中运行
+uv run python -c "import flask; print(flask.__version__)"
 ```
 
-这将安装 Python 3.11 并将其固定为项目使用的版本。
+**问题：flask-cors 导入错误**
+```python
+# 正确的导入方式
+from flask_cors import CORS  # 注意是下划线，不是连字符
+```
 
-### 6.4 在Conda环境中使用uv
+**问题：依赖版本冲突**
+```bash
+# 查看依赖树
+uv pip show <package_name>
 
-如果您在Conda环境中使用uv，可能会遇到依赖包安装到Conda环境而不是uv虚拟环境的问题。这是因为uv会检测当前激活的Python环境并优先使用它。
+# 更新到兼容版本
+uv sync --upgrade
+```
 
-要确保uv使用自己的虚拟环境，请：
+### 6.3 环境相关问题
 
-1. 退出当前的Conda环境：
-   ```bash
-   conda deactivate
-   ```
+**问题：Conda 环境冲突**
+```bash
+# 方案1：退出 Conda 环境
+conda deactivate
+uv sync
 
-2. 确保在项目根目录执行所有uv命令：
-   ```bash
-   # 初始化项目（如果尚未初始化）
-   uv init
-   
-   # 安装依赖
-   uv sync
-   
-   # 运行项目
-   uv run python start_web.py
-   ```
+# 方案2：在 Conda 环境中使用 uv
+# 确保 uv 创建独立的 .venv 目录
+ls -la .venv/  # 检查虚拟环境是否存在
+```
 
-3. 如果您希望继续使用Conda环境，可以直接在Conda环境中安装依赖：
-   ```bash
-   uv sync
-   uv run python start_web.py
-   ```
+**问题：权限错误**
+```bash
+# macOS/Linux 权限问题
+sudo chown -R $USER:$USER .venv/
 
-注意：uv虚拟环境通常创建在项目根目录的.venv文件夹中。您可以通过检查该目录是否存在以及是否包含Python解释器来确认uv是否正确创建了虚拟环境。
+# Windows 权限问题
+# 以管理员身份运行终端
+```
 
-## 7. 最佳实践总结
+### 6.4 性能相关问题
 
-1. 始终在项目根目录使用 uv init 初始化项目
-2. 使用 uv add 添加项目依赖，使用 uv sync 同步依赖
-3. 使用 uv run 运行项目脚本
-4. 定期更新依赖：uv add --upgrade-package <package_name> 或 uv sync --upgrade
-5. 利用 uv.lock 文件确保环境一致性
-6. 在需要时使用 uv python pin 指定 Python 版本
+**问题：启动缓慢**
+```bash
+# 检查依赖数量
+uv pip list | wc -l
 
-### 详细说明
+# 使用开发模式启动
+uv run python start_web.py --debug
 
-- **uv add**：这是推荐的添加依赖方式，它会自动将依赖添加到 `pyproject.toml` 文件中，并更新 `uv.lock` 锁文件。这种方式能够更好地管理项目依赖，确保依赖的一致性。
-- **uv sync**：用于根据 `pyproject.toml` 和 `uv.lock` 文件同步依赖到当前环境中。当团队成员克隆项目或在不同环境中工作时，使用 `uv sync` 可以确保所有依赖都正确安装。
-- **避免使用 uv pip install**：虽然 `uv pip install` 也能安装依赖，但它不会自动更新 `pyproject.toml` 和 `uv.lock` 文件，可能导致依赖管理不一致。只有在特殊情况下才建议使用。
+# 检查系统资源
+top -p $(pgrep -f start_web.py)
+```
 
-通过遵循这些最佳实践，可以更好地利用 uv 工具链的优势，提高项目依赖管理的效率和一致性。
+### 6.5 网络相关问题
+
+**问题：下载依赖失败**
+```bash
+# 使用国内镜像源
+uv pip install -i https://pypi.tuna.tsinghua.edu.cn/simple/ <package>
+
+# 或配置全局镜像源
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
+```
+
+### 6.6 调试技巧
+
+```bash
+# 详细输出模式
+uv sync -v
+
+# 检查项目配置
+uv run python -c "import sys; print(sys.executable)"
+
+# 验证虚拟环境
+which python  # 应该指向 .venv/bin/python
+
+# 检查服务状态
+curl http://localhost:5001/health  # 如果有健康检查端点
+```
+
+**🆘 仍然无法解决？**
+1. 检查 [uv 官方文档](https://docs.astral.sh/uv/)
+2. 查看项目 Issues 页面
+3. 提供详细的错误信息和环境信息
+
+## 7. 📚 最佳实践总结
+
+### 7.1 核心原则
+
+| 原则 | 说明 | 示例 |
+|------|------|------|
+| **环境隔离** | 每个项目使用独立的虚拟环境 | 让 uv 自动管理 `.venv` |
+| **版本锁定** | 使用 `uv.lock` 确保环境一致性 | 提交 `uv.lock` 到版本控制 |
+| **声明式管理** | 在 `pyproject.toml` 中声明依赖 | 避免手动编辑 `requirements.txt` |
+| **自动化优先** | 使用 uv 命令而非手动操作 | `uv run` 而不是手动激活环境 |
+
+### 7.2 日常工作流程
+
+```bash
+# 📥 克隆项目后的首次设置
+git clone <repository>
+cd AIxiezuo
+uv sync                    # 安装所有依赖
+
+# 🔄 日常开发
+uv run python start_web.py # 启动服务
+uv add requests            # 添加新依赖
+uv remove unused-package   # 移除不需要的依赖
+
+# 🔄 定期维护
+uv sync --upgrade          # 更新依赖到最新兼容版本
+uv cache clean             # 清理缓存（可选）
+
+# 📤 提交代码前
+git add pyproject.toml uv.lock  # 确保依赖变更被提交
+```
+
+### 7.3 团队协作规范
+
+**✅ 推荐做法**：
+- 始终使用 `uv sync` 安装依赖
+- 提交 `uv.lock` 文件到版本控制
+- 使用 `uv add/remove` 管理依赖
+- 在 PR 中审查依赖变更
+- 定期更新依赖并测试
+
+**❌ 避免做法**：
+- 不要手动编辑 `uv.lock` 文件
+- 不要使用 `pip install` 安装依赖
+- 不要忽略 `pyproject.toml` 的变更
+- 不要在不同环境中使用不同的包管理器
+
+### 7.4 性能优化建议
+
+```bash
+# 🚀 加速依赖安装
+export UV_CACHE_DIR=/tmp/uv-cache  # 使用更快的缓存目录
+uv sync --no-dev                   # 生产环境跳过开发依赖
+
+# 🔍 依赖分析
+uv pip list --format=json | jq '.[] | select(.version | contains("dev"))'  # 查找开发版本
+uv export --format=requirements-txt > requirements.txt  # 导出兼容格式
+```
+
+### 7.5 安全最佳实践
+
+```bash
+# 🔒 安全检查
+uv pip audit                       # 检查已知漏洞（如果支持）
+uv pip list | grep -E "(dev|alpha|beta|rc)"  # 检查预发布版本
+
+# 🔐 依赖固定
+uv add "requests>=2.28.0,<3.0.0"  # 使用版本范围
+uv lock                            # 生成精确的锁文件
+```
+
+### 7.6 故障预防
+
+```bash
+# 🛡️ 环境备份
+cp uv.lock uv.lock.backup         # 备份锁文件
+uv export > requirements-backup.txt  # 导出备用格式
+
+# 🔄 环境重置
+rm -rf .venv uv.lock              # 完全重置（谨慎使用）
+uv sync                           # 重新创建环境
+```
+
+**💡 专业提示**：
+- 使用 `uv run` 确保命令在正确环境中执行
+- 定期运行 `uv sync` 保持环境同步
+- 在 CI/CD 中使用 `uv sync --frozen` 确保严格的版本匹配
+- 利用 `uv.lock` 文件实现可重现的构建
 
 ## uv 工具链的主要优势
 
@@ -388,36 +576,126 @@ steps:
 3. **简化配置**：uv 的自动虚拟环境管理减少了 CI/CD 配置的复杂性
 4. **更好的缓存支持**：uv 的智能缓存机制可以进一步提高构建速度
 
-## 附录A：uv命令速查表
+## 📖 附录A：uv命令速查表
+
+### 基础命令
+
+| 命令 | 用途 | 示例 | 使用频率 |
+|------|------|------|----------|
+| `uv sync` | 同步依赖（最常用） | `uv sync` | ⭐⭐⭐⭐⭐ |
+| `uv run <command>` | 运行命令 | `uv run python start_web.py` | ⭐⭐⭐⭐⭐ |
+| `uv add <package>` | 添加依赖 | `uv add flask` | ⭐⭐⭐⭐ |
+| `uv remove <package>` | 移除依赖 | `uv remove flask` | ⭐⭐⭐ |
+| `uv init` | 初始化项目 | `uv init` | ⭐⭐ |
+
+### 依赖管理
 
 | 命令 | 用途 | 示例 |
 |------|------|------|
-| `uv init` | 初始化项目 | `uv init` |
-| `uv add <package>` | 添加依赖 | `uv add flask` |
-| `uv remove <package>` | 移除依赖 | `uv remove flask` |
-| `uv sync` | 同步依赖 | `uv sync` |
-| `uv run <command>` | 在虚拟环境中运行命令 | `uv run python app.py` |
-| `uv pip list` | 列出已安装的包 | `uv pip list` |
-| `uv pip install <package>` | 安装包（不推荐） | `uv pip install flask` |
-| `uv pip uninstall <package>` | 卸载包 | `uv pip uninstall flask` |
-| `uv python install <version>` | 安装Python版本 | `uv python install 3.11` |
-| `uv python pin <version>` | 固定Python版本 | `uv python pin 3.11` |
-| `uv lock` | 生成锁文件 | `uv lock` |
-| `uv export` | 导出requirements.txt | `uv export > requirements.txt` |
+| `uv add --dev <package>` | 添加开发依赖 | `uv add --dev pytest` |
+| `uv add --optional <group> <package>` | 添加可选依赖 | `uv add --optional dev black` |
+| `uv sync --no-dev` | 仅安装生产依赖 | `uv sync --no-dev` |
+| `uv sync --upgrade` | 更新依赖 | `uv sync --upgrade` |
+| `uv sync --force-reinstall` | 强制重装 | `uv sync --force-reinstall` |
+
+### Python 版本管理
+
+| 命令 | 用途 | 示例 |
+|------|------|------|
+| `uv python list` | 列出可用Python版本 | `uv python list` |
+| `uv python install 3.12` | 安装Python版本 | `uv python install 3.12` |
+| `uv python pin 3.12` | 固定Python版本 | `uv python pin 3.12` |
+| `uv python find` | 查找Python解释器 | `uv python find` |
+
+### 环境管理
+
+| 命令 | 用途 | 示例 |
+|------|------|------|
+| `uv venv` | 创建虚拟环境 | `uv venv .venv` |
+| `uv venv --python 3.12` | 指定Python版本创建环境 | `uv venv --python 3.12` |
+| `uv pip list` | 列出已安装包 | `uv pip list` |
+| `uv pip show <package>` | 显示包信息 | `uv pip show flask` |
+
+### 实用工具
+
+| 命令 | 用途 | 示例 |
+|------|------|------|
+| `uv lock` | 生成/更新锁文件 | `uv lock` |
+| `uv export` | 导出依赖列表 | `uv export > requirements.txt` |
 | `uv cache clean` | 清理缓存 | `uv cache clean` |
-| `uv venv` | 创建虚拟环境 | `uv venv` |
+| `uv cache dir` | 显示缓存目录 | `uv cache dir` |
+| `uv --version` | 显示版本信息 | `uv --version` |
 
-## 附录B：uv与pip命令对照表
+## 📖 附录B：uv与传统工具对照表
 
-| pip命令 | uv命令 | 说明 |
-|---------|--------|------|
-| `pip install <package>` | `uv add <package>` | 添加依赖并更新pyproject.toml |
-| `pip install -r requirements.txt` | `uv sync` | 同步依赖 |
-| `pip uninstall <package>` | `uv remove <package>` | 移除依赖 |
+### pip 命令迁移
+
+| 传统 pip 命令 | uv 等效命令 | 说明 |
+|---------------|-------------|------|
+| `pip install <package>` | `uv add <package>` | 添加依赖并更新配置文件 |
+| `pip install -r requirements.txt` | `uv sync` | 根据配置文件同步依赖 |
+| `pip uninstall <package>` | `uv remove <package>` | 移除依赖并更新配置 |
 | `pip list` | `uv pip list` | 列出已安装的包 |
 | `pip freeze > requirements.txt` | `uv export > requirements.txt` | 导出依赖列表 |
-| `pip show <package>` | `uv pip show <package>` | 显示包信息 |
-| `pip check` | `uv pip check` | 检查依赖一致性 |
-| `python -m venv venv` | `uv venv` | 创建虚拟环境 |
-| `source venv/bin/activate` | 自动激活 | uv自动管理虚拟环境 |
-| `deactivate` | 无需手动执行 | uv自动管理虚拟环境 |
+| `pip show <package>` | `uv pip show <package>` | 显示包详细信息 |
+| `pip check` | `uv pip check` | 检查依赖完整性 |
+| `pip install --upgrade <package>` | `uv sync --upgrade` | 更新依赖 |
+
+### 虚拟环境管理迁移
+
+| 传统方式 | uv 方式 | 优势 |
+|----------|---------|------|
+| `python -m venv .venv` | `uv venv` 或自动创建 | 更快的创建速度 |
+| `source .venv/bin/activate` | 无需手动激活 | 自动环境管理 |
+| `deactivate` | 无需手动停用 | 自动环境管理 |
+| `which python` | `uv run which python` | 确保正确环境 |
+
+### 项目管理迁移
+
+| 传统方式 | uv 方式 | 说明 |
+|----------|---------|------|
+| `requirements.txt` | `pyproject.toml` + `uv.lock` | 更现代的依赖管理 |
+| `setup.py` | `pyproject.toml` | 标准化项目配置 |
+| `pip-tools` | 内置锁文件机制 | 无需额外工具 |
+| `pipenv` | uv 全套工具链 | 更快更简单 |
+
+### 开发工作流迁移
+
+| 传统工作流 | uv 工作流 | 时间节省 |
+|------------|-----------|----------|
+| 创建环境 → 激活 → 安装依赖 | `uv sync` | ~70% |
+| 手动管理 requirements.txt | 自动管理 pyproject.toml | ~50% |
+| 手动激活环境运行脚本 | `uv run <script>` | ~30% |
+| 手动检查依赖冲突 | 自动依赖解析 | ~80% |
+
+### 🚀 迁移建议
+
+**从 pip + venv 迁移**：
+```bash
+# 旧方式
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python start_web.py
+
+# 新方式
+uv sync
+uv run python start_web.py
+```
+
+**从 pipenv 迁移**：
+```bash
+# 导出现有依赖
+pipenv requirements > requirements.txt
+
+# 使用 uv 重新创建
+uv init
+uv add $(cat requirements.txt | grep -v "^-" | cut -d'=' -f1)
+```
+
+**从 poetry 迁移**：
+```bash
+# poetry 和 uv 都使用 pyproject.toml
+# 通常可以直接运行
+uv sync
+```
