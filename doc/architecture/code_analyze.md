@@ -106,7 +106,7 @@ Web界面基于现代前端技术开发，提供直观易用的操作界面，�
 
 ### 3.1 生成章节
 
-- **URL**: `/api/generate`
+- **URL**: `/generate`
 - **Method**: `POST`
 - **Request Body**:
   ```json
@@ -134,7 +134,7 @@ Web界面基于现代前端技术开发，提供直观易用的操作界面，�
 
 ### 3.2 交互调用
 
-- **URL**: `/api/chat`
+- **URL**: 此端点不存在，请使用命令行chat()方法
 - **Method**: `POST`
 - **Request Body**:
   ```json
@@ -224,7 +224,7 @@ Web界面基于现代前端技术开发，提供直观易用的操作界面，�
   }
   ```
 
-### 3.3 设定管理接口
+### 3.6 设定管理接口
 
 #### 获取设定文件列表
 
@@ -340,7 +340,7 @@ graph TD
 
 ### 5.1 环境准备
 
-确保系统已安装Python 3.8或更高版本。
+确保系统已安装Python 3.12或更高版本（项目要求）。
 
 ### 5.2 安装依赖
 
@@ -432,9 +432,9 @@ content = generator.generate_chapter(
 5. **更新状态**：如果启用了状态更新，系统会调用`update_state`方法，根据新生成的章节内容更新角色状态。
 
 **参数说明：**
-- `chapter_outline`：章节细纲，描述本章的主要情节和内容。
+- `chapter_outline`：章节细纲，描述本章的主要情节和内容（可以是JSON字符串或纯文本）。
 - `model_name`：指定使用的大语言模型名称。
-- `system_prompt`：系统提示词，包含写手角色和写作规则。
+- `system_prompt`：系统提示词，包含写手角色和写作规则（需要手动读取模板文件并拼接）。
 - `session_id`：会话ID，用于区分不同的对话会话。
 - `use_state`：是否使用角色状态。
 - `use_world_bible`：是否使用世界设定。
@@ -519,13 +519,13 @@ content = generator.generate_chapter(
 系统通过`.env`文件和`LLMConfigManager`类管理不同模型的配置信息。
 
 **配置项说明：**
-- `DEEPSEEK_API_KEY`：DeepSeek模型的API密钥。
-- `OPENAI_API_KEY`：OpenAI模型的API密钥。
-- `ANTHROPIC_API_KEY`：Anthropic模型的API密钥。
-- `GOOGLE_API_KEY`：Google模型的API密钥。
-- `DSF_API_MODEL`：第三方模型的名称。
-- `DSF_API_KEY`：第三方模型的API密钥。
-- `DSF_API_URL`：第三方模型的API地址。
+- `DEEPSEEK_API_KEY`：DeepSeek模型的API密钥
+- `OPENAI_API_KEY`：OpenAI模型的API密钥
+- `ANTHROPIC_API_KEY`：Anthropic模型的API密钥
+- `GOOGLE_API_KEY`：Google模型的API密钥
+- `DSF5_API_MODEL`：第三方模型的名称
+- `DSF5_API_KEY`：第三方模型的API密钥
+- `DSF5_API_URL`：第三方模型的API地址
 
 **配置原理：**
 - 系统在启动时读取`.env`文件中的配置信息。

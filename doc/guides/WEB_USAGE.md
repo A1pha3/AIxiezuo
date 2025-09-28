@@ -348,20 +348,12 @@ cp -r xiaoshuo/ xiaoshuo_backup_$(date +%Y%m%d_%H%M%S)/
 
 #### 生成小说章节
 ```http
-POST /api/generate
+POST /generate
 Content-Type: application/json
-Authorization: Bearer <your_token>
 
 {
   "template_id": "001",
-  "chapter_plan": {
-    "chapter_index": 1,
-    "title": "第一章：开始",
-    "main_plot": "主角的起源故事",
-    "chapter_outline": ["场景1", "场景2", "场景3"],
-    "target_word_count": 2500,
-    "mood": "紧张神秘"
-  },
+  "chapter_outline": "第一章：开始\n主角的起源故事\n场景1: 日常生活\n场景2: 意外发生\n场景3: 能力觉醒",
   "model_name": "deepseek_chat",
   "novel_id": "my_novel_001",
   "use_state": true,

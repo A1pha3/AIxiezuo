@@ -1,6 +1,6 @@
 # 小说生成系统 - 模版系统说明文档
 
-[详细技术文档](./doc/code_analyze.md)
+[详细技术文档](../architecture/code_analyze.md)
 
 ## 1. 模版目录结构
 
@@ -100,7 +100,7 @@ system_prompt = f"{writer_role}\n\n{writing_rules}"
 
 # 5. 调用生成方法
 generator.generate_chapter(
-    chapter_plan=chapter_plan,
+    chapter_outline=chapter_outline,  # 注意参数名
     system_prompt=system_prompt,
     model_name="deepseek_chat"
 )
@@ -112,7 +112,7 @@ System Message:
 [writer_role内容] + [writing_rules内容]
 
 User Message:  
-章节计划: {chapter_plan}
+章节纲要: {chapter_outline}
 当前状态: {character_state_json}
 世界设定: {world_bible_json}
 ```

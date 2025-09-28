@@ -3,7 +3,7 @@
 ## 项目概述
 基于LangChain的智能小说生成系统，采用高度模块化和插件式架构设计。系统通过全局配置管理器和统一调用接口实现完全的参数化控制，无硬编码提示词或占位符。
 
-[详细技术文档](./doc/code_analyze.md)
+[详细技术文档](../architecture/code_analyze.md)
 
 ## 核心架构特性
 - 🔧 **全局配置管理** - 统一的大模型配置获取
@@ -109,7 +109,7 @@ writer_role = read_template("001_writer_role.txt")
 writing_rules = read_template("001_writing_rules.txt")
 system_prompt = writer_role + "\n\n" + writing_rules
 
-# 定义章节计划 (包含章节纲要和剧情设定)
+# 定义章节纲要 (可以是JSON字符串或纯文本)
 chapter_outline = """
 {
   "chapter_index": 1,
@@ -125,9 +125,9 @@ chapter_outline = """
 }
 """
 
-# 生成章节（注意：参数名为chapter_outline）
+# 生成章节
 content = generator.generate_chapter(
-    chapter_outline=chapter_outline,      # 章节细纲（可以是JSON字符串或纯文本）
+    chapter_outline=chapter_outline,      # 章节纲要（可以是JSON字符串或纯文本）
     model_name="deepseek_chat",
     system_prompt=system_prompt,          # 传入拼接好的模版提示词
     use_state=True,
@@ -201,7 +201,7 @@ response = LLMCaller.call(
 - `chunk_size` (int) - 分片大小（消息数量），默认100
 
 ### generate_chapter() 参数详解
-- `chapter_plan` (dict) - 章节计划，必需。包含章节纲要、剧情设定等结构化数据
+- `chapter_outline` (str) - 章节纲要，必需。可以是JSON字符串或纯文本描述
 - `model_name` (str) - 模型名称，默认"deepseek_chat"
 - `system_prompt` (str) - **系统提示词，默认空。这是传入模版提示词的入口**
   - 调用前需读取模版文件：`writer_role.txt + writing_rules.txt`
@@ -271,6 +271,8 @@ langchain/
 
 在 `LLMCaller.call()` 中添加对应的provider处理逻辑。
 
+⚠️ **重要**：不得修改deepseek_chat、deepseek_reasoner和dsf5的配置，这些是用户固定设置。
+
 ### 自定义业务逻辑
 继承或组合 `NovelGenerator` 类：
 ```python
@@ -323,7 +325,7 @@ class CustomGenerator(NovelGenerator):
 
 3. **dsf5**
    - API Key: `DSF5_API_KEY`
-   - Base URL: `https://第三方api地址/v1`
-   - Model: `[稳定]gemini-2.5-pro-preview-06-05-c`
+   - Base URL: 从DSF5_API_URL环境变量读取
+   - Model: 从DSF5_API_MODEL环境变量读取
 
 这些配置已在代码中标记保护，任何修改都会导致用户设置丢失。

@@ -4,7 +4,7 @@
 
 ## 📋 项目要求
 
-- **Python版本**: >=3.12 (根据项目 pyproject.toml 配置)
+- **Python版本**: ≥3.12 (项目要求，根据pyproject.toml配置)
 - **推荐工具**: uv (比传统 pip 快 10-100 倍)
 - **项目类型**: AI小说生成系统，基于 LangChain 和 Flask
 - **主要依赖**: 
